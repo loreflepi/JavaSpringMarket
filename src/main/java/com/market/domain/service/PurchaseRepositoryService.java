@@ -40,16 +40,12 @@ public class PurchaseRepositoryService implements PurchaseRepository {
 
     @Override
     public Purchase save(Purchase purchase) {
-        Compra newPurchase = compraCrudRepository.save(new Compra(purchase));
-        final Purchase returnPurchase = new Purchase(newPurchase);
-        returnPurchase.setBoughtProducts(new ArrayList<>());
-        purchase.getBoughtProducts().forEach(value -> {
-            value.setIdPurchase(newPurchase.getIdCompra());
-            comprasProductoCrudRepository.save(new ComprasProducto(value));
-            returnPurchase.getBoughtProducts().add(value);
-        });
-
-        return returnPurchase;
+        Compra compra = new Compra(purchase);
+        if (compra.getComprasProductos() != null) {
+            compra.getComprasProductos().forEach(value -> value.setCompra(compra));
+        }
+        compraCrudRepository.save(compra);
+        return new Purchase(compra);
     }
 
     private List<Purchase> getCollect(List<Compra> compras) {
